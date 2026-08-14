@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuditMaster Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'glow': '0 0 15px rgba(99, 102, 241, 0.3)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #f8fafc; }
+        
+        /* Smooth scrolling and transitions */
+        html { scroll-behavior: smooth; }
+        .transition-smooth { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Glassmorphism Utility */
+        .glass {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* Animation classes */
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-slide-in { animation: slideIn 0.4s ease-out forwards; }
+    </style>
+</head>
+<body class="text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Premium Header with Glass Effect -->
+    <nav class="glass sticky top-0 z-50 w-full border-b border-slate-200/60">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-3">
+                    <div class="bg-indigo-600 text-white p-1.5 rounded-lg shadow-glow">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-bold text-slate-900 tracking-tight leading-none">AuditMaster<span class="text-indigo-600">Pro</span></h1>
+                        <p class="text-[10px] font-medium text-slate-500 uppercase tracking-widest">Compliance Suite</p>
+                    </div>
+                </div>
+                
+                <!-- User Profile / Context (Visual only) -->
+                <div class="flex items-center gap-4">
+                    <div class="hidden md:flex flex-col items-end">
+                        <span class="text-xs font-semibold text-slate-700">Inspector Mode</span>
+                        <span class="text-[10px] text-slate-400">GCAA / FAA Part 145</span>
+                    </div>
+                    <div class="h-8 w-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 ring-2 ring-white shadow-sm"></div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Application Area -->
+    <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Dashboard Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-slide-in">
+            <!-- Progress Card -->
+            <div class="bg-white rounded-2xl p-6 shadow-soft border border-slate-100 relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-4 opacity-10">
+                    <svg class="w-24 h-24 text-indigo-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                </div>
+                <p class="text-sm font-medium text-slate-500 mb-1">Audit Completion</p>
+                <div class="flex items-baseline gap-2">
+                    <h2 class="text-3xl font-bold text-slate-900" id="progress-text">0%</h2>
+                    <span class="text-xs font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded-full">On Track</span>
+                </div>
+                <div class="w-full bg-slate-100 rounded-full h-1.5 mt-4">
+                    <div id="progress-bar" class="bg-indigo-600 h-1.5 rounded-full transition-all duration-700 ease-out shadow-glow" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Critical Items Card -->
+            <div class="bg-white rounded-2xl p-6 shadow-soft border border-slate-100">
+                <div class="flex items-center justify-between mb-2">
+                    <p class="text-sm font-medium text-slate-500">Critical Findings</p>
+                    <div class="p-1.5 bg-red-50 text-red-600 rounded-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+                    </div>
+                </div>
+                <h2 class="text-3xl font-bold text-slate-900" id="critical-count">0</h2>
+                <p class="text-xs text-slate-400 mt-1">Items requiring immediate attention</p>
+            </div>
+
+            <!-- Action Items Card -->
+            <div class="bg-white rounded-2xl p-6 shadow-soft border border-slate-100">
+                <div class="flex items-center justify-between mb-2">
+                    <p class="text-sm font-medium text-slate-500">Pending Actions</p>
+                    <div class="p-1.5 bg-blue-50 text-blue-600 rounded-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
+                    </div>
+                </div>
+                <h2 class="text-3xl font-bold text-slate-900" id="pending-count">28</h2>
+                <p class="text-xs text-slate-400 mt-1">Total items remaining</p>
+            </div>
+        </div>
+        
+        <!-- Toolbar -->
+        <div class="flex flex-col lg:flex-row gap-4 mb-6 items-center justify-between animate-slide-in" style="animation-delay: 0.1s">
+            <!-- Search Input -->
+            <div class="relative w-full lg:w-96 group">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="h-5 w-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <input type="text" id="search-input" 
+                    class="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-sm text-sm" 
+                    placeholder="Search regulations, areas, or requirements...">
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="bg-white p-1 rounded-xl border border-slate-200 shadow-sm inline-flex" id="filter-container">
+                <button onclick="setFilter('All')" data-filter="All" class="filter-btn px-4 py-1.5 text-sm font-medium rounded-lg transition-all text-white bg-indigo-600 shadow-sm">
+                    All
+                </button>
+                <button onclick="setFilter('Critical')" data-filter="Critical" class="filter-btn px-4 py-1.5 text-sm font-medium rounded-lg transition-all text-slate-600 hover:bg-slate-50 hover:text-slate-900">
+                    Critical
+                </button>
+                <button onclick="setFilter('Major')" data-filter="Major" class="filter-btn px-4 py-1.5 text-sm font-medium rounded-lg transition-all text-slate-600 hover:bg-slate-50 hover:text-slate-900">
+                    Major
+                </button>
+                <button onclick="setFilter('Minor')" data-filter="Minor" class="filter-btn px-4 py-1.5 text-sm font-medium rounded-lg transition-all text-slate-600 hover:bg-slate-50 hover:text-slate-900">
+                    Minor
+                </button>
+            </div>
+        </div>
+
+        <!-- List Container -->
+        <div id="list-container" class="space-y-4 pb-12">
+            <!-- Cards injected via JS -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="hidden flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-dashed border-slate-200 text-center">
+            <div class="p-4 bg-slate-50 rounded-full mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-300"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            </div>
+            <h3 class="text-lg font-semibold text-slate-900">No matches found</h3>
+            <p class="text-slate-500 text-sm mt-1 max-w-xs mx-auto">We couldn't find any audit items matching your current filters.</p>
+            <button onclick="resetFilters()" class="mt-6 text-sm font-medium text-indigo-600 hover:text-indigo-700">Clear all filters</button>
+        </div>
+
+    </main>
+
+    <script>
+        // --- DATA SOURCE (GCAA/EASA & FAA) ---
+        const initialData = [
+            { id: 1, source: "GCAA/EASA", area: "Quality System", regRef: "27(1)(c)", requirement: "Establish and monitor independent Quality Assurance Program", evidence: "Check QAP manual and audit reports.", docs: "QAP Manual", severity: "Major", action: "Formalize review system.", timeframe: "60 days" },
+            { id: 2, source: "GCAA/EASA", area: "Calibration", regRef: "19(3)", requirement: "All tools must be calibrated and traceable", evidence: "Check tool stickers and register.", docs: "Calib. Register", severity: "Critical", action: "Quarantine expired tools.", timeframe: "Immediate" },
+            { id: 3, source: "GCAA/EASA", area: "Data Control", regRef: "33(1)", requirement: "Maintenance manuals must be available to everyone", evidence: "Check computers and books on floor.", docs: "MPM 2.8", severity: "Critical", action: "Fix access points.", timeframe: "7 days" },
+            { id: 4, source: "GCAA/EASA", area: "Training", regRef: "21(14)", requirement: "Staff need initial and continuation training", evidence: "Check training records for dates.", docs: "Training Log", severity: "Major", action: "Schedule training.", timeframe: "60 days" },
+            { id: 5, source: "GCAA/EASA", area: "Currency", regRef: "22(6)", requirement: "Staff must work 6 months in every 2-year period", evidence: "Check shift logs.", docs: "Staff Records", severity: "Minor", action: "Restrict privileges.", timeframe: "30 days" },
+            { id: 6, source: "GCAA/EASA", area: "MPM Approval", regRef: "26(1)", requirement: "MPM manual must be approved by Authority", evidence: "Check approval signature.", docs: "MPM Front Page", severity: "Major", action: "Submit for approval.", timeframe: "7 days" },
+            { id: 7, source: "GCAA/EASA", area: "Environment", regRef: "18(2)", requirement: "Hangar must be clean and climate controlled", evidence: "Walk around inspection.", docs: "MPM 2.7", severity: "Major", action: "Fix environment.", timeframe: "30 days" },
+            { id: 8, source: "GCAA/EASA", area: "Storage", regRef: "18(3)", requirement: "Separate good parts from bad parts", evidence: "Check quarantine cage.", docs: "MPM 2.3", severity: "Major", action: "Segregate parts.", timeframe: "7 days" },
+            { id: 9, source: "GCAA/EASA", area: "Release Certs", regRef: "31(3)", requirement: "Release certificates must have unique numbers", evidence: "Check recent certificates.", docs: "MPM 2.16", severity: "Minor", action: "Update forms.", timeframe: "30 days" },
+            { id: 10, source: "GCAA/EASA", area: "Sub-contracting", regRef: "29(2)", requirement: "Cannot sub-contract 100% of the work", evidence: "Check contracts.", docs: "MPM 5.2", severity: "Critical", action: "Halt certification.", timeframe: "Immediate" },
+            { id: 11, source: "FAA Part 145", area: "Org Approval", regRef: "§145", requirement: "Ops Specs must match actual work done", evidence: "Read Ops Specs vs Reality.", docs: "OpSpecs", severity: "Major" },
+            { id: 12, source: "FAA Part 145", area: "Manuals", regRef: "§145.211", requirement: "Repair Station Manual must be current", evidence: "Check revision log.", docs: "RSM", severity: "Major" },
+            { id: 13, source: "FAA Part 145", area: "Quality Control", regRef: "§145.211", requirement: "QC Manual available to staff", evidence: "Ask staff to show you QCM.", docs: "QCM", severity: "Major" },
+            { id: 14, source: "FAA Part 145", area: "Facilities", regRef: "§145.103", requirement: "Facility lighting and ventilation is good", evidence: "Visual check.", docs: "RSM", severity: "Major" },
+            { id: 15, source: "FAA Part 145", area: "Security", regRef: "§145.103", requirement: "Maintenance area is locked/secured", evidence: "Check doors/badges.", docs: "Security Plan", severity: "Major" },
+            { id: 16, source: "FAA Part 145", area: "Storage", regRef: "§145.103", requirement: "Bad parts kept away from good parts", evidence: "Check storage shelves.", docs: "RSM", severity: "Major" },
+            { id: 17, source: "FAA Part 145", area: "Personnel", regRef: "§145.151", requirement: "Mechanics are qualified", evidence: "Check licenses.", docs: "Emp. Records", severity: "Major" },
+            { id: 18, source: "FAA Part 145", area: "Training", regRef: "§145.163", requirement: "Training records are up to date", evidence: "Check files.", docs: "Training Files", severity: "Major" },
+            { id: 19, source: "FAA Part 145", area: "Calibration", regRef: "§145.109", requirement: "Tools have valid stickers", evidence: "Check dates on tools.", docs: "Calib. Logs", severity: "Critical" },
+            { id: 20, source: "FAA Part 145", area: "Tools", regRef: "§145.109", requirement: "All required tools are present", evidence: "Inventory check.", docs: "Tool Lists", severity: "Major" },
+            { id: 21, source: "FAA Part 145", area: "Tech Data", regRef: "§145.109", requirement: "Manuals are subscribed and current", evidence: "Check subscriptions.", docs: "Sub Logs", severity: "Major" },
+            { id: 22, source: "FAA Part 145", area: "Work Orders", regRef: "§43.13", requirement: "Work orders filled out completely", evidence: "Read open work orders.", docs: "Work Packages", severity: "Major" },
+            { id: 23, source: "FAA Part 145", area: "Inspections", regRef: "§145.213", requirement: "Inspectors sign off on critical steps", evidence: "Check signatures.", docs: "Work Packages", severity: "Critical" },
+            { id: 24, source: "FAA Part 145", area: "Return To Service", regRef: "§43.9", requirement: "Only authorized people sign RTS", evidence: "Check auth list vs signature.", docs: "RTS Logs", severity: "Critical" },
+            { id: 25, source: "FAA Part 145", area: "Receiving", regRef: "§145.211", requirement: "Incoming parts inspected properly", evidence: "Watch receiving process.", docs: "Receiving Logs", severity: "Major" },
+            { id: 26, source: "FAA Part 145", area: "Records", regRef: "§145.219", requirement: "Records kept safe for required time", evidence: "Check archives.", docs: "Archives", severity: "Major" },
+            { id: 27, source: "FAA Part 145", area: "Safety", regRef: "Rec.", requirement: "Hazards are reported (SMS)", evidence: "Check report box.", docs: "SMS Manual", severity: "Minor" },
+            { id: 28, source: "FAA Part 145", area: "Audits", regRef: "§145.211", requirement: "Internal audits happen yearly", evidence: "Check schedule.", docs: "Audit Reports", severity: "Major" }
+        ];
+
+        // --- STATE MANAGEMENT ---
+        let state = { search: "", filter: "All", audited: new Set(), expanded: new Set() };
+        
+        // --- CACHE DOM ELEMENTS ---
+        const listContainer = document.getElementById('list-container');
+        const searchInput = document.getElementById('search-input');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const emptyState = document.getElementById('empty-state');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        const criticalCountEl = document.getElementById('critical-count');
+        const pendingCountEl = document.getElementById('pending-count');
+
+        // --- HELPERS ---
+        const getSeverityStyles = (sev) => {
+            switch(sev) {
+                case 'Critical': return { bg: 'bg-red-50', text: 'text-red-700', dot: 'bg-red-500', border: 'border-l-4 border-l-red-500' };
+                case 'Major': return { bg: 'bg-orange-50', text: 'text-orange-700', dot: 'bg-orange-500', border: 'border-l-4 border-l-orange-400' };
+                case 'Minor': return { bg: 'bg-blue-50', text: 'text-blue-700', dot: 'bg-blue-500', border: 'border-l-4 border-l-blue-400' };
+                default: return { bg: 'bg-slate-50', text: 'text-slate-700', dot: 'bg-slate-500', border: 'border-l-4 border-l-slate-300' };
+            }
+        };
+
+        // --- ACTIONS ---
+        const toggleAudit = (id) => {
+            if (state.audited.has(id)) state.audited.delete(id);
+            else state.audited.add(id);
+            render();
+        };
+
+        const toggleExpand = (id) => {
+            if (state.expanded.has(id)) state.expanded.delete(id);
+            else state.expanded.add(id);
+            render();
+        };
+
+        const setFilter = (filterName) => {
+            state.filter = filterName;
+            render();
+        };
+
+        const resetFilters = () => {
+            state.filter = 'All';
+            state.search = '';
+            searchInput.value = '';
+            render();
+        };
+
+        searchInput.addEventListener('input', (e) => {
+            state.search = e.target.value;
+            render();
+        });
+
+        // --- RENDER LOGIC ---
+        const render = () => {
+            // 1. Update Dashboard Stats
+            const totalItems = initialData.length;
+            const auditedCount = state.audited.size;
+            const percentage = Math.round((auditedCount / totalItems) * 100);
+            const criticalCount = initialData.filter(i => i.severity === 'Critical' && !state.audited.has(i.id)).length;
+            
+            progressBar.style.width = `${percentage}%`;
+            progressText.innerText = `${percentage}%`;
+            criticalCountEl.innerText = criticalCount;
+            pendingCountEl.innerText = totalItems - auditedCount;
+
+            // 2. Update Filter Tabs UI
+            filterBtns.forEach(btn => {
+                if (btn.dataset.filter === state.filter) {
+                    btn.className = 'filter-btn px-4 py-1.5 text-sm font-medium rounded-lg transition-all text-white bg-indigo-600 shadow-sm';
+                } else {
+                    btn.className = 'filter-btn px-4 py-1.5 text-sm font-medium rounded-lg transition-all text-slate-600 hover:bg-slate-50 hover:text-slate-900 bg-transparent';
+                }
+            });
+
+            // 3. Filter Data
+            const filtered = initialData.filter(item => {
+                const searchLower = state.search.toLowerCase();
+                const matchesSearch = item.requirement.toLowerCase().includes(searchLower) || 
+                                      item.area.toLowerCase().includes(searchLower) ||
+                                      item.regRef.toLowerCase().includes(searchLower);
+                const matchesFilter = state.filter === 'All' || item.severity === state.filter;
+                return matchesSearch && matchesFilter;
+            });
+
+            // 4. Render List
+            listContainer.innerHTML = '';
+            
+            if (filtered.length === 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                filtered.forEach((item, index) => {
+                    const isDone = state.audited.has(item.id);
+                    const isExpanded = state.expanded.has(item.id);
+                    const styles = getSeverityStyles(item.severity);
+                    
+                    const card = document.createElement('div');
+                    // Card Container Styles
+                    card.className = `group bg-white rounded-xl border transition-all duration-300 ease-out animate-slide-in overflow-hidden
+                        ${isDone ? 'border-slate-200 opacity-60 bg-slate-50' : 'border-slate-200 hover:border-indigo-200 hover:shadow-soft'}
+                        ${styles.border}
+                    `;
+                    card.style.animationDelay = `${index * 0.05}s`; // Stagger animation
+
+                    card.innerHTML = `
+                        <!-- Main Card Body -->
+                        <div class="p-5">
+                            <div class="flex flex-col md:flex-row md:items-start gap-4 justify-between">
+                                
+                                <!-- Left Content -->
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="text-[10px] font-bold tracking-wider uppercase text-slate-400">${item.source}</span>
+                                        <span class="h-1 w-1 rounded-full bg-slate-300"></span>
+                                        <div class="flex items-center gap-1.5 ${styles.text}">
+                                            <span class="h-1.5 w-1.5 rounded-full ${styles.dot}"></span>
+                                            <span class="text-[10px] font-bold uppercase tracking-wider">${item.severity}</span>
+                                        </div>
+                                    </div>
+
+                                    <h3 class="text-base font-semibold text-slate-900 leading-snug ${isDone ? 'line-through text-slate-500' : ''}">
+                                        ${item.requirement}
+                                    </h3>
+                                    
+                                    <div class="mt-1 text-sm text-slate-500 flex items-center gap-x-4 flex-wrap">
+                                        <span class="font-medium text-slate-600">${item.area}</span>
+                                        <span class="text-slate-300">|</span>
+                                        <span class="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">Ref: ${item.regRef}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Right Actions -->
+                                <div class="flex items-center justify-between md:justify-end gap-4 mt-4 md:mt-0 md:shrink-0">
+                                    <!-- Details Toggle -->
+                                    <button onclick="toggleExpand(${item.id})" class="text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors flex items-center gap-1">
+                                        Details
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform ${isExpanded ? 'rotate-180' : ''}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </button>
+
+                                    <!-- Status Toggle Button -->
+                                    <button onclick="toggleAudit(${item.id})" 
+                                        class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${isDone ? 'bg-green-500' : 'bg-slate-200 hover:bg-slate-300'}" 
+                                        role="switch" aria-checked="${isDone}">
+                                        <span class="sr-only">Mark complete</span>
+                                        <span aria-hidden="true" class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isDone ? 'translate-x-5' : 'translate-x-0'}"></span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Expanded Details Panel -->
+                        <div class="overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-96 border-t border-slate-100' : 'max-h-0'}">
+                            <div class="p-5 bg-slate-50/50 grid md:grid-cols-2 gap-6 text-sm">
+                                
+                                <!-- Verification Column -->
+                                <div>
+                                    <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Verification</h4>
+                                    <div class="space-y-3">
+                                        <div class="flex gap-3">
+                                            <div class="mt-0.5 text-slate-400">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                                            </div>
+                                            <p class="text-slate-700"><span class="font-medium text-slate-900">Evidence:</span> ${item.evidence}</p>
+                                        </div>
+                                        <div class="flex gap-3">
+                                            <div class="mt-0.5 text-slate-400">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
+                                            </div>
+                                            <p class="text-slate-700"><span class="font-medium text-slate-900">Reference Docs:</span> ${item.docs}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Action Column (Conditional) -->
+                                ${item.action ? `
+                                    <div class="bg-white rounded-lg border border-orange-100 p-4 shadow-sm">
+                                        <div class="flex items-start gap-3">
+                                            <div class="text-orange-500 mt-0.5">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                            </div>
+                                            <div>
+                                                <h5 class="text-xs font-bold text-orange-700 uppercase tracking-wide mb-1">If Non-Compliant</h5>
+                                                <p class="text-slate-700 mb-2">${item.action}</p>
+                                                <div class="inline-flex items-center px-2 py-1 rounded bg-orange-50 text-orange-700 text-xs font-medium border border-orange-100">
+                                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                                    Due: ${item.timeframe || 'Immediate'}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ` : '<div></div>'}
+                            </div>
+                        </div>
+                    `;
+                    listContainer.appendChild(card);
+                });
+            }
+        };
+
+        // Initialize
+        render();
+
+    </script>
+</body>
+</html>
