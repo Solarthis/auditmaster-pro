@@ -51,6 +51,10 @@
             to { opacity: 1; transform: translateY(0); }
         }
         .animate-slide-in { animation: slideIn 0.4s ease-out forwards; }
+            [hidden] { display: none !important; }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation: none !important; transition: none !important; }
+        }
     </style>
 </head>
 <body class="text-slate-800 min-h-screen flex flex-col">
@@ -83,6 +87,9 @@
 
     <!-- Main Application Area -->
     <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <aside id="prototype-notice" role="note" class="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+            Demonstration only: this is not an approved compliance checklist. Verify applicable requirements and approved procedures before operational use. Example severities and timelines are illustrative; selections last only for this page session.
+        </aside>
         
         <!-- Dashboard Stats Grid -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-slide-in">
@@ -97,14 +104,14 @@
                     <span class="text-xs font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded-full">On Track</span>
                 </div>
                 <div class="w-full bg-slate-100 rounded-full h-1.5 mt-4">
-                    <div id="progress-bar" class="bg-indigo-600 h-1.5 rounded-full transition-all duration-700 ease-out shadow-glow" style="width: 0%"></div>
+                    <div id="progress-bar" role="progressbar" aria-label="Checklist review progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" class="bg-indigo-600 h-1.5 rounded-full transition-all duration-700 ease-out shadow-glow" style="width: 0%"></div>
                 </div>
             </div>
 
             <!-- Critical Items Card -->
             <div class="bg-white rounded-2xl p-6 shadow-soft border border-slate-100">
                 <div class="flex items-center justify-between mb-2">
-                    <p class="text-sm font-medium text-slate-500">Critical Findings</p>
+                    <p class="text-sm font-medium text-slate-500">Critical checks remaining</p>
                     <div class="p-1.5 bg-red-50 text-red-600 rounded-lg">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
                     </div>
@@ -116,7 +123,7 @@
             <!-- Action Items Card -->
             <div class="bg-white rounded-2xl p-6 shadow-soft border border-slate-100">
                 <div class="flex items-center justify-between mb-2">
-                    <p class="text-sm font-medium text-slate-500">Pending Actions</p>
+                    <p class="text-sm font-medium text-slate-500">Checks not reviewed</p>
                     <div class="p-1.5 bg-blue-50 text-blue-600 rounded-lg">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
                     </div>
@@ -262,6 +269,9 @@
 
         // --- RENDER LOGIC ---
         const render = () => {
+            const active = document.activeElement;
+            const focusId = active?.dataset.itemId;
+            const focusAction = active?.dataset.action;
             // 1. Update Dashboard Stats
             const totalItems = initialData.length;
             const auditedCount = state.audited.size;
@@ -269,12 +279,15 @@
             const criticalCount = initialData.filter(i => i.severity === 'Critical' && !state.audited.has(i.id)).length;
             
             progressBar.style.width = `${percentage}%`;
+            progressBar.setAttribute('aria-valuenow', String(percentage));
+            progressBar.setAttribute('aria-valuetext', `${auditedCount} of ${totalItems} reviewed`);
             progressText.innerText = `${percentage}%`;
             criticalCountEl.innerText = criticalCount;
             pendingCountEl.innerText = totalItems - auditedCount;
 
             // 2. Update Filter Tabs UI
             filterBtns.forEach(btn => {
+                btn.setAttribute('aria-pressed', String(btn.dataset.filter === state.filter));
                 if (btn.dataset.filter === state.filter) {
                     btn.className = 'filter-btn px-4 py-1.5 text-sm font-medium rounded-lg transition-all text-white bg-indigo-600 shadow-sm';
                 } else {
@@ -284,10 +297,9 @@
 
             // 3. Filter Data
             const filtered = initialData.filter(item => {
-                const searchLower = state.search.toLowerCase();
-                const matchesSearch = item.requirement.toLowerCase().includes(searchLower) || 
-                                      item.area.toLowerCase().includes(searchLower) ||
-                                      item.regRef.toLowerCase().includes(searchLower);
+                const searchLower = state.search.trim().toLowerCase();
+                const matchesSearch = ['requirement', 'area', 'regRef', 'source', 'evidence', 'docs']
+                    .some(key => String(item[key] || '').toLowerCase().includes(searchLower));
                 const matchesFilter = state.filter === 'All' || item.severity === state.filter;
                 return matchesSearch && matchesFilter;
             });
@@ -328,7 +340,7 @@
                                         </div>
                                     </div>
 
-                                    <h3 class="text-base font-semibold text-slate-900 leading-snug ${isDone ? 'line-through text-slate-500' : ''}">
+                                    <h3 id="requirement-${item.id}" class="text-base font-semibold text-slate-900 leading-snug ${isDone ? 'line-through text-slate-500' : ''}">
                                         ${item.requirement}
                                     </h3>
                                     
@@ -342,7 +354,7 @@
                                 <!-- Right Actions -->
                                 <div class="flex items-center justify-between md:justify-end gap-4 mt-4 md:mt-0 md:shrink-0">
                                     <!-- Details Toggle -->
-                                    <button onclick="toggleExpand(${item.id})" class="text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors flex items-center gap-1">
+                                    <button onclick="toggleExpand(${item.id})" data-item-id="${item.id}" data-action="details" aria-expanded="${isExpanded}" aria-controls="details-${item.id}" aria-label="Details for ${item.area}" class="text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors flex items-center gap-1">
                                         Details
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform ${isExpanded ? 'rotate-180' : ''}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -350,10 +362,10 @@
                                     </button>
 
                                     <!-- Status Toggle Button -->
-                                    <button onclick="toggleAudit(${item.id})" 
-                                        class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${isDone ? 'bg-green-500' : 'bg-slate-200 hover:bg-slate-300'}" 
-                                        role="switch" aria-checked="${isDone}">
-                                        <span class="sr-only">Mark complete</span>
+                                    <button onclick="toggleAudit(${item.id})" data-item-id="${item.id}" data-action="review" 
+                                        class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 ${isDone ? 'bg-green-500' : 'bg-slate-200 hover:bg-slate-300'}" 
+                                        role="switch" aria-checked="${isDone}" aria-label="${isDone ? 'Mark unreviewed' : 'Mark reviewed'}: ${item.area}">
+                                        <span class="sr-only">Mark reviewed</span>
                                         <span aria-hidden="true" class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isDone ? 'translate-x-5' : 'translate-x-0'}"></span>
                                     </button>
                                 </div>
@@ -361,7 +373,7 @@
                         </div>
 
                         <!-- Expanded Details Panel -->
-                        <div class="overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-96 border-t border-slate-100' : 'max-h-0'}">
+                        <div id="details-${item.id}" role="region" aria-labelledby="requirement-${item.id}" ${isExpanded ? '' : 'hidden'} class="overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-96 border-t border-slate-100' : 'max-h-0'}">
                             <div class="p-5 bg-slate-50/50 grid md:grid-cols-2 gap-6 text-sm">
                                 
                                 <!-- Verification Column -->
@@ -406,6 +418,10 @@
                     `;
                     listContainer.appendChild(card);
                 });
+            }
+            if (focusId && focusAction) {
+                [...listContainer.querySelectorAll('button[data-item-id]')]
+                    .find(button => button.dataset.itemId === focusId && button.dataset.action === focusAction)?.focus();
             }
         };
 
